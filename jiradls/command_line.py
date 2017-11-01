@@ -15,7 +15,7 @@ class iJIRA(object):
     return self._jira
 
   def do(self, words):
-    if not words:
+    if not words or words[0] == '':
       return self.do_help()
     func = getattr(self, 'do_' + words[0].lower())
     if func:
