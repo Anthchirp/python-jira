@@ -4,7 +4,6 @@ import sys
 
 from jiradls.dlsjira import DLSJIRA
 
-
 class iJIRA(object):
   def __init__(self):
     self._jira = None
@@ -86,7 +85,7 @@ class iJIRA(object):
 #   from pprint import pprint
 #   pprint(fields)
     issue = self.jira().create_issue(fields=fields)
-    print("\nTicket {} created".format(issue))
+    print("Ticket {} created".format(issue))
 
   def do_do(self, words):
     for ticket in words:
