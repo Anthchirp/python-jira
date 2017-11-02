@@ -5,6 +5,8 @@ python -c "import sys; assert sys.hexversion >= 0x02070000, 'python too old'"
 python -c "import wheel" || python -m pip install wheel
 python -c "import twine" || python -m pip install twine
 python setup.py clean --all
+rm -f dist/*
+
 python setup.py sdist bdist_wheel
 
 python -m twine upload dist/*
