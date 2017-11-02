@@ -17,6 +17,13 @@ status_name = {
 # Map status names to IDs
 status_id = { status_name[i]: i for i in status_name }
 
+# Default resolutions for closing tickets
+closing_resolutions = {
+  "resolve as don't do": "Non Issue",
+  "resolve as done": "Completed",
+  "close": "Done",
+}
+
 # Exhaustive list of all allowed status transitions in (Diamond workflow || Simple workflow)
 transitions = {
   1: [ 2, 3, 7, 8, 10 ],
