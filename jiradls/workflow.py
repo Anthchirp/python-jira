@@ -32,12 +32,16 @@ transitions = {
 }
 
 def route_workflow(status_from, status_to, dont_pass=None):
-  '''Find routes from one status ID to another.'''
-  if status_from == status_to: # path found
-    return [[ status_to ]]
+  '''Find routes from one status ID to another.
+     Destination can also be a list of equivalent nodes.'''
+
+  if type(status_to) is not list:
+    status_to = [ status_to ]
+
+  if status_from in status_to: # path found
+    return [ [status_from] ]
 
   routes = []
-
   if dont_pass is None:
     dont_pass = set()
   dont_pass = dont_pass | {status_from} # no cycles
