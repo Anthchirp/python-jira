@@ -4,6 +4,8 @@ import sys
 
 from colorama import Fore, Style
 import jiradls.dlsjira
+import jiradls.workflow
+import six
 
 colors = {
   'white': Fore.WHITE + Style.BRIGHT,
@@ -16,7 +18,9 @@ class iJIRA(object):
   def __init__(self):
     self._jira = None
     self._aliases = {
-      'comment': 'say'
+      'comment': 'say',
+      'done': 'close',
+      'todo': 'open',
     }
 
   def jira(self):
@@ -46,6 +50,11 @@ class iJIRA(object):
           text = text.strip(' \t\n\r').split('\n', 1)
           print("{green}{command} - {white}{text[0]}{reset}".format(
             command=command, text=text, **colors))
+          indent = ' ' * (len(command) + 3)
+          aliases = [ "jira " + k for k in self._aliases if self._aliases[k] == f[3:] ]
+          if aliases:
+            plural = 'es' if len(aliases) > 1 else ''
+            print("{indent}(also: {green}{list}{reset})".format(indent=indent, plural=plural, list="{reset}, {green}".join(aliases), **colors))
           if len(text) > 1:
             indent = ' ' * (len(command) + 3)
             body = text[1].strip(' \t\n\r').split('\n')
@@ -67,6 +76,7 @@ class iJIRA(object):
       print("{}: {}".format(i, i.fields.summary))
 
   def do_add(self, words=None):
+    '''Create a new ticket'''
     fields = {
       'project': 'SCRATCH',
       'summary': [],
@@ -117,53 +127,95 @@ class iJIRA(object):
     issue = self.jira().create_issue(fields=fields)
     print("Ticket {} created".format(issue))
 
-  def do_do(self, words):
-    for ticket in words:
-      if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
-      issue = self.jira().issue(ticket)
-      if issue.fields.status.name == 'In Progress':
-        print("Ticket {} already in progress.".format(ticket))
-        continue
-      transitions = self.jira().transitions(issue)
-      transitions = { t['name'].lower(): t['id'] for t in transitions }
-      if 'start work' in transitions:
-        self.jira().transition_issue(issue, transitions['start work'])
-        print("Ticket {} in progress.".format(ticket))
-      else:
-        print("Could not start work on ticket {}, available transitions: {}".format(ticket, list(transitions)))
+  def transition_to(self, ticket, target, maxdepth=3):
+    # Convert targets into a list of IDs
+    if isinstance(target, (int, six.string_types)):
+      target = [target]
+    target = [t if isinstance(t, int) else jiradls.workflow.status_id[t.lower()] for t in target]
 
-  def do_done(self, words):
+    # Obtain current status as ID
+    issue = self.jira().issue(ticket)
+    current_status = jiradls.workflow.status_id[issue.fields.status.name.lower()]
+
+    if current_status in target:
+      return None # We are already there.
+
+    routes = jiradls.workflow.route_workflow(current_status, target)
+    if not routes:
+      return False # There is no route from here to there.
+
+    transitions = self.jira().transitions(issue)
+    transitions = { jiradls.workflow.status_id[t['to']['name'].lower()]: t for t in transitions }
+#   print("Status: {}".format(issue.fields.status.name))
+#   print("Target: {}".format(target))
+
+    selected_route = None
+    for r in routes:
+      if r[0] == current_status and r[1] in transitions:
+        selected_route = r
+        break
+    if not selected_route:
+      return False # There is no valid route from here to there.
+ #  print("Route: {}".format(selected_route))
+    print("{issue}: {transition}".format(issue=issue, transition=transitions[selected_route[1]]['name']))
+
+    transition_fields = {}
+    if transitions[selected_route[1]]['name'].lower() in jiradls.workflow.closing_resolutions:
+      transition_fields['resolution'] = { 'name': jiradls.workflow.closing_resolutions[transitions[selected_route[1]]['name'].lower()] }
+    self.jira().transition_issue(issue, transitions[selected_route[1]]['id'], fields=transition_fields)
+
+    if len(selected_route) <= 2:
+      # This was a direct route. We're done
+      return True
+
+    # This was not a direct route, so recurse (up to maxdepth levels)
+    if maxdepth > 0:
+#     print("Recursing to {} {}".format(issue, target))
+      return self.transition_to(ticket, target, maxdepth-1)
+
+    # Recursion failure
+    print("Recursion failure")
+    return False
+
+  def do_work(self, words):
+    """Mark ticket as 'in progress'"""
     for ticket in words:
       if '-' not in ticket:
         ticket = 'SCRATCH-' + ticket
-      issue = self.jira().issue(ticket)
-      if issue.fields.status.name == 'Wait Deploy':
-        print("Ticket {} already waiting for deployment.".format(ticket))
-        continue
-      transitions = self.jira().transitions(issue)
-      transitions = { t['name'].lower(): t['id'] for t in transitions }
-      if 'await deployment' in transitions:
-        self.jira().transition_issue(issue, transitions['await deployment'])
-        print("Ticket {} awaiting deployment.".format(ticket))
-      else:
-        print("Could not mark ticket {} as done, available transitions: {}".format(ticket, list(transitions)))
+      print({ None: "Ticket {} already in progress.",
+              True: "Ticket {} in progress.",
+      }.get(self.transition_to(ticket, ('In Progress', 'Active')),
+                    "Could not start work on ticket {}").format(ticket))
+
+  def do_wait(self, words):
+    """Mark ticket as 'waiting for deployment'"""
+    for ticket in words:
+      if '-' not in ticket:
+        ticket = 'SCRATCH-' + ticket
+      print({ None: "Ticket {} already waiting for deployment.",
+              True: "Ticket {} waiting for deployment.",
+      }.get(self.transition_to(ticket, ('Validation', 'Wait Deploy')),
+                    "Could not mark ticket {} as waiting for deployment").format(ticket))
 
   def do_close(self, words):
+    """Close a ticket"""
     for ticket in words:
       if '-' not in ticket:
         ticket = 'SCRATCH-' + ticket
-      issue = self.jira().issue(ticket)
-      if issue.fields.status.name in ('Resolved', 'Closed'):
-        print("Ticket {} already closed.".format(ticket))
-        continue
-      transitions = self.jira().transitions(issue)
-      transitions = { t['name'].lower(): t['id'] for t in transitions }
-      if 'close' in transitions:
-        self.jira().transition_issue(issue, transitions['close'], resolution={'name': 'Completed'})
-        print("Ticket {} closed.".format(ticket))
-      else:
-        print("Could not close ticket {}, available transitions: {}".format(ticket, list(transitions)))
+      print({ None: "Ticket {} already closed.",
+              True: "Ticket {} closed.",
+      }.get(self.transition_to(ticket, ('Resolved', 'Closed')),
+                    "Could not close ticket {}").format(ticket))
+
+  def do_open(self, words):
+    """Reset ticket into open state"""
+    for ticket in words:
+      if '-' not in ticket:
+        ticket = 'SCRATCH-' + ticket
+      print({ None: "Ticket {} already open.",
+              True: "Ticket {} opened.",
+      }.get(self.transition_to(ticket, ('Open', 'Deferred')),
+                    "Could not open ticket {}").format(ticket))
 
 def main():
   iJIRA().do(sys.argv[1:])
