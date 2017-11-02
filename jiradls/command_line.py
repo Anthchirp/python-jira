@@ -2,31 +2,61 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 
-from jiradls.dlsjira import DLSJIRA
+from colorama import Fore, Style
+import jiradls.dlsjira
+
+colors = {
+  'white': Fore.WHITE + Style.BRIGHT,
+  'dim': Style.DIM,
+  'reset': Style.RESET_ALL,
+  'green': Fore.GREEN + Style.BRIGHT,
+}
 
 class iJIRA(object):
   def __init__(self):
     self._jira = None
+    self._aliases = {
+      'comment': 'say'
+    }
 
   def jira(self):
     if not self._jira:
-      self._jira = DLSJIRA()
+      self._jira = jiradls.dlsjira.DLSJIRA()
     return self._jira
 
   def do(self, words):
     if not words or words[0] == '':
       return self.do_help()
-    func = getattr(self, 'do_' + words[0].lower())
-    if func:
-      return func(words[1:])
-    {
-      'help': self.do_help,
-    }.get(words[0].lower(), 'help')(words[1:])
+    command = words[0].lower()
+    command = self._aliases.get(command, command)
+    try:
+      func = getattr(self, 'do_' + command)
+    except AttributeError:
+      return print("Unknown command '{}'. Run with\n   $ jira\nto see what is possible.".format(command))
+    return func(words[1:])
 
   def do_help(self, *args):
-    print("Welcome to the JIRA cli. Try\n  $ jira list")
+    '''Shows command line help.'''
+    print("JIRA command line interface v{}\n".format(jiradls.__version__))
+    for f in sorted(dir(self)):
+      if f.startswith('do_'):
+        command = f.replace('do_', 'jira ')
+        text = getattr(self, f).__doc__
+        if text:
+          text = text.strip(' \t\n\r').split('\n', 1)
+          print("{green}{command} - {white}{text[0]}{reset}".format(
+            command=command, text=text, **colors))
+          if len(text) > 1:
+            indent = ' ' * (len(command) + 3)
+            body = text[1].strip(' \t\n\r').split('\n')
+            print("{indent}{body}".format(indent=indent, body=('\n' + indent).join(body)))
+          print()
 
   def do_list(self, words=None):
+    '''Shows a list of all your issues
+
+       This is currently unsorted and limited to 50 issues.
+    '''
     all_my_issues = self.jira().search_issues('assignee = currentUser() AND resolution = unresolved ORDER BY RANK ASC')
     if all_my_issues.total == len(all_my_issues):
       print("Your open issues are:")

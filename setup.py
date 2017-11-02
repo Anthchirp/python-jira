@@ -34,6 +34,7 @@ setup(
   download_url="https://github.com/Anthchirp/python-jira/releases",
   version=find_version("jiradls", "__init__.py"),
   install_requires=[
+    'colorama',
     'cryptography',
     'ipython',
     'jira',
