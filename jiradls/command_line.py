@@ -18,7 +18,8 @@ class iJIRA(object):
   def __init__(self):
     self._jira = None
     self._aliases = {
-      'comment': 'say',
+      'say': 'comment',
+      'do': 'work',
       'done': 'close',
       'todo': 'open',
     }
@@ -216,6 +217,14 @@ class iJIRA(object):
               True: "Ticket {} opened.",
       }.get(self.transition_to(ticket, ('Open', 'Deferred')),
                     "Could not open ticket {}").format(ticket))
+
+  def do_comment(self, words):
+    """Add a comment to a ticket"""
+    ticket = words[0]
+    if '-' not in ticket:
+      ticket = 'SCRATCH-' + ticket
+    comment = " ".join(words[1:])
+    self.jira().add_comment(ticket, comment)
 
 def main():
   iJIRA().do(sys.argv[1:])
