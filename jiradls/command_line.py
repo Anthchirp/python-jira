@@ -23,6 +23,7 @@ class iJIRA(object):
       'do': 'work',
       'done': 'close',
       'todo': 'open',
+      'reassign': 'assign',
     }
 
   def jira(self):
@@ -217,6 +218,21 @@ class iJIRA(object):
       ticket = 'SCRATCH-' + ticket
     comment = " ".join(words[1:])
     self.jira().add_comment(ticket, comment)
+
+  def do_assign(self, words):
+    """Assign ticket(s) to another user"""
+    user = words[0].lower()
+    if not user.startswith('@'):
+      print("Pass username with leading '@' first, followed by list of ticket IDs.")
+      return
+    assignee = jiradls.diamond.employee.get(user[1:], user[1:])
+    for ticket in words[1:]:
+      if '-' not in ticket:
+        ticket = 'SCRATCH-' + ticket
+      print({ True: "Ticket {ticket} assigned to {assignee}",
+        }.get(self.jira().assign_issue(ticket, assignee),
+              "Could not assign ticket {ticket} to {assignee}") \
+        .format(ticket=ticket, assignee=assignee))
 
 def main():
   iJIRA().do(sys.argv[1:])
