@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 
 from colorama import Fore, Style
+import jiradls.diamond
 import jiradls.dlsjira
 import jiradls.workflow
 import six
@@ -94,17 +95,8 @@ class iJIRA(object):
       l = w.lower()
 #     print((n, w))
       if w.startswith('@') and fields['assignee'] is None: # Assign user
-        if l[1:] in ('gw'):
-          fields['assignee'] = 'gw56'
-          continue
-        if l[1:] in ('mg'):
-          fields['assignee'] = 'wra62962'
-          continue
-        if l[1:] in ('rg', 'rjg'):
-          fields['assignee'] = 'hko55533'
-          continue
-        if l[1:] in ('is'):
-          fields['assignee'] = 'voo82357'
+        if l[1:] in jiradls.diamond.employee:
+          fields['assignee'] = jiradls.diamond.employee[l[1:]]
           continue
         if n < (len(words)-1):
           fields['assignee'] = l[1:]
