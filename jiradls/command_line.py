@@ -2,10 +2,10 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 
-from colorama import Fore, Style
 import jiradls.diamond
 import jiradls.workflow
 import six
+from colorama import Fore, Style
 
 colors = {
   'white': Fore.WHITE + Style.BRIGHT,

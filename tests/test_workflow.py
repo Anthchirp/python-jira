@@ -1,3 +1,4 @@
+from __future__ import absolute_import, division, print_function
 import jiradls.workflow
 
 def test_dls_workflow_status_dictionary():
