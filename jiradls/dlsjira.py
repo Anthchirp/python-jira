@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from __future__ import absolute_import, division, print_function
 
 import json
@@ -87,6 +86,7 @@ def _save_configuration():
     json.dump(_configuration, fh)
 
 def DLSJIRA():
+  '''Returns a JIRA object that is authenticated against the Diamond JIRA instance.'''
   options = { 'server': _dlsconfig['server'] }
 
   oauth = {
@@ -111,9 +111,3 @@ def DLSJIRA():
       _save_configuration()
       oauth.update({ k: _configuration[k] for k in ('access_token', 'access_token_secret') })
       return jira.JIRA(options=options, oauth=oauth)
-
-if __name__ == '__main__':
-  jira = DLSJIRA()
-  i = jira.issue('SCRATCH-30')
-  print(str(i))
-  print(repr(i))

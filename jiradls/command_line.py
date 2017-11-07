@@ -4,7 +4,6 @@ import sys
 
 from colorama import Fore, Style
 import jiradls.diamond
-import jiradls.dlsjira
 import jiradls.workflow
 import six
 
@@ -28,7 +27,7 @@ class iJIRA(object):
 
   def jira(self):
     if not self._jira:
-      self._jira = jiradls.dlsjira.DLSJIRA()
+      self._jira = jiradls.jiradls()
     return self._jira
 
   def do(self, words):
