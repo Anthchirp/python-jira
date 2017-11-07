@@ -81,11 +81,12 @@ class iJIRA(object):
   def do_add(self, words=None):
     '''Create a new ticket'''
     fields = {
-      'project': 'SCRATCH',
+      'project': 'SCI',
       'summary': [],
       'description': '',
       'issuetype': { 'name': 'Minor Task/Bug' },
-      'components': [{ 'name': 'Scisoft MX' }],
+      'labels': [ 'MXSW' ],
+      'components': [],
       'assignee': None,
     }
 
@@ -105,9 +106,9 @@ class iJIRA(object):
       if l in priorities:
         fields['priority'] = { 'name': priorities[l] }
         continue
-      if l == 'sci':
-        fields['project'] = 'SCI'
-        fields['components'] = []
+      if l == 'scratch':
+        fields['project'] = 'SCRATCH'
+        fields['components'] = [{ 'name': 'Scisoft MX' }]
         continue
       break
 #   print(n)
@@ -175,7 +176,10 @@ class iJIRA(object):
     """Mark ticket as 'in progress'"""
     for ticket in words:
       if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
+        if int(ticket) < 100:
+          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
+          return
+        ticket = 'SCI-' + ticket
       print({ None: "Ticket {} already in progress.",
               True: "Ticket {} in progress.",
       }.get(self.transition_to(ticket, ('In Progress', 'Active')),
@@ -185,7 +189,10 @@ class iJIRA(object):
     """Mark ticket as 'waiting for deployment'"""
     for ticket in words:
       if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
+        if int(ticket) < 100:
+          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
+          return
+        ticket = 'SCI-' + ticket
       print({ None: "Ticket {} already waiting for deployment.",
               True: "Ticket {} waiting for deployment.",
       }.get(self.transition_to(ticket, ('Validation', 'Wait Deploy')),
@@ -195,7 +202,10 @@ class iJIRA(object):
     """Close a ticket"""
     for ticket in words:
       if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
+        if int(ticket) < 100:
+          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
+          return
+        ticket = 'SCI-' + ticket
       print({ None: "Ticket {} already closed.",
               True: "Ticket {} closed.",
       }.get(self.transition_to(ticket, ('Resolved', 'Closed')),
@@ -205,7 +215,10 @@ class iJIRA(object):
     """Reset ticket into open state"""
     for ticket in words:
       if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
+        if int(ticket) < 100:
+          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
+          return
+        ticket = 'SCI-' + ticket
       print({ None: "Ticket {} already open.",
               True: "Ticket {} opened.",
       }.get(self.transition_to(ticket, ('Open', 'Deferred')),
@@ -215,7 +228,7 @@ class iJIRA(object):
     """Add a comment to a ticket"""
     ticket = words[0]
     if '-' not in ticket:
-      ticket = 'SCRATCH-' + ticket
+      ticket = 'SCI-' + ticket
     comment = " ".join(words[1:])
     self.jira().add_comment(ticket, comment)
 
@@ -228,7 +241,7 @@ class iJIRA(object):
     assignee = jiradls.diamond.employee.get(user[1:], user[1:])
     for ticket in words[1:]:
       if '-' not in ticket:
-        ticket = 'SCRATCH-' + ticket
+        ticket = 'SCI-' + ticket
       print({ True: "Ticket {ticket} assigned to {assignee}",
         }.get(self.jira().assign_issue(ticket, assignee),
               "Could not assign ticket {ticket} to {assignee}") \
