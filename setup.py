@@ -36,7 +36,6 @@ setup(
   install_requires=[
     'colorama',
     'cryptography',
-    'ipython',
     'jira',
     'pyjwt',
   ],
