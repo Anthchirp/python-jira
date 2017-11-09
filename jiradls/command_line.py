@@ -23,6 +23,8 @@ class iJIRA(object):
       'done': 'close',
       'todo': 'open',
       'reassign': 'assign',
+      'stuck': 'block',
+      'unstuck': 'unblock',
     }
 
   def jira(self):
@@ -245,6 +247,22 @@ class iJIRA(object):
         }.get(self.jira().assign_issue(ticket, assignee),
               "Could not assign ticket {ticket} to {assignee}") \
         .format(ticket=ticket, assignee=assignee))
+
+  def do_block(self, words):
+    """Mark a ticket as blocked/stuck"""
+    ticket = words[0]
+    if '-' not in ticket:
+      ticket = 'SCI-' + ticket
+    comment = " ".join(words[1:])
+    self.jira().issue(ticket).update(fields={'customfield_10010': [ { 'id': '10000' } ] })
+
+  def do_unblock(self, words):
+    """Mark a ticket as no longer blocked/stuck"""
+    ticket = words[0]
+    if '-' not in ticket:
+      ticket = 'SCI-' + ticket
+    comment = " ".join(words[1:])
+    self.jira().issue(ticket).update(fields={'customfield_10010': None})
 
 def main():
   iJIRA().do(sys.argv[1:])
