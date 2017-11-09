@@ -8,7 +8,7 @@ import six
 from colorama import Fore, Style
 
 colors = {
-  'white': Fore.WHITE + Style.BRIGHT,
+  'bold': Style.RESET_ALL + Style.BRIGHT,
   'dim': Style.DIM,
   'reset': Style.RESET_ALL,
   'green': Fore.GREEN + Style.BRIGHT,
@@ -52,7 +52,7 @@ class iJIRA(object):
         text = getattr(self, f).__doc__
         if text:
           text = text.strip(' \t\n\r').split('\n', 1)
-          print("{green}{command} - {white}{text[0]}{reset}".format(
+          print("{green}{command} - {bold}{text[0]}{reset}".format(
             command=command, text=text, **colors))
           indent = ' ' * (len(command) + 3)
           aliases = [ "jira " + k for k in self._aliases if self._aliases[k] == f[3:] ]
