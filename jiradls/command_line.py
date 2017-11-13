@@ -250,19 +250,19 @@ class iJIRA(object):
 
   def do_block(self, words):
     """Mark a ticket as blocked/stuck"""
-    ticket = words[0]
-    if '-' not in ticket:
-      ticket = 'SCI-' + ticket
-    comment = " ".join(words[1:])
-    self.jira().issue(ticket).update(fields={'customfield_10010': [ { 'id': '10000' } ] })
+    for ticket in words:
+      if '-' not in ticket:
+        ticket = 'SCI-' + ticket
+      print("marking %s as blocked" % ticket)
+      self.jira().issue(ticket).update(fields={'customfield_10010': [ { 'id': '10000' } ] })
 
   def do_unblock(self, words):
     """Mark a ticket as no longer blocked/stuck"""
-    ticket = words[0]
-    if '-' not in ticket:
-      ticket = 'SCI-' + ticket
-    comment = " ".join(words[1:])
-    self.jira().issue(ticket).update(fields={'customfield_10010': None})
+    for ticket in words:
+      if '-' not in ticket:
+        ticket = 'SCI-' + ticket
+      print("marking %s as unblocked" % ticket)
+      self.jira().issue(ticket).update(fields={'customfield_10010': None})
 
   def do_priority(self, words):
     """Change ticket priority
