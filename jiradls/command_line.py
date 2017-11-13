@@ -264,5 +264,22 @@ class iJIRA(object):
     comment = " ".join(words[1:])
     self.jira().issue(ticket).update(fields={'customfield_10010': None})
 
+  def do_priority(self, words):
+    """Change ticket priority
+       (trivial = lowest, minor = low, normal, major = high, critical = highest)"""
+    priorities = { 't': 'Trivial', 'mi': 'Minor', 'n': 'Normal', 'ma': 'Major', 'c': 'Critical',
+                   'h': 'Major', 'highe': 'Critical', 'l': 'Minor', 'lowe': 'Trivial' }
+    target_priority = words[0].lower()
+    possible_priorities = filter(lambda x: target_priority.startswith(x), list(priorities))
+    if not possible_priorities or '-' in target_priority:
+      print("'%s' is not a valid priority (trivial = lowest, minor = low, normal, major = high, critical = highest)" % target_priority)
+      return 
+    target_priority = priorities.get(max(possible_priorities, key=len))
+    for ticket in words[1:]:
+      if '-' not in ticket:
+        ticket = 'SCI-' + ticket
+      print("Changing priority of %s to %s" % (ticket, target_priority))
+      self.jira().issue(ticket).update(fields={'priority': { 'name': target_priority }})
+
 def main():
   iJIRA().do(sys.argv[1:])
