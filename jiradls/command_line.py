@@ -176,11 +176,8 @@ class iJIRA(object):
   def do_work(self, words):
     """Mark ticket as 'in progress'"""
     for ticket in words:
-      if '-' not in ticket:
-        if int(ticket) < 100:
-          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
-          return
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print({ None: "Ticket {} already in progress.",
               True: "Ticket {} in progress.",
       }.get(self.transition_to(ticket, ('In Progress', 'Active')),
@@ -189,11 +186,8 @@ class iJIRA(object):
   def do_wait(self, words):
     """Mark ticket as 'waiting for deployment'"""
     for ticket in words:
-      if '-' not in ticket:
-        if int(ticket) < 100:
-          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
-          return
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print({ None: "Ticket {} already waiting for deployment.",
               True: "Ticket {} waiting for deployment.",
       }.get(self.transition_to(ticket, ('Validation', 'Wait Deploy')),
@@ -202,11 +196,8 @@ class iJIRA(object):
   def do_close(self, words):
     """Close a ticket"""
     for ticket in words:
-      if '-' not in ticket:
-        if int(ticket) < 100:
-          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
-          return
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print({ None: "Ticket {} already closed.",
               True: "Ticket {} closed.",
       }.get(self.transition_to(ticket, ('Resolved', 'Closed')),
@@ -215,11 +206,8 @@ class iJIRA(object):
   def do_open(self, words):
     """Reset ticket into open state"""
     for ticket in words:
-      if '-' not in ticket:
-        if int(ticket) < 100:
-          print("Did you mean SCRATCH-{}? Default is now to use the 'SCI-' namespace. Not touching ticket!".format(ticket))
-          return
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print({ None: "Ticket {} already open.",
               True: "Ticket {} opened.",
       }.get(self.transition_to(ticket, ('Open', 'Deferred')),
@@ -227,9 +215,8 @@ class iJIRA(object):
 
   def do_comment(self, words):
     """Add a comment to a ticket"""
-    ticket = words[0]
-    if '-' not in ticket:
-      ticket = 'SCI-' + ticket
+    ticket = jiradls.diamond.issue_number(words[0])
+    if not ticket: return
     comment = " ".join(words[1:])
     self.jira().add_comment(ticket, comment)
 
@@ -241,26 +228,36 @@ class iJIRA(object):
       return
     assignee = jiradls.diamond.employee.get(user[1:], user[1:])
     for ticket in words[1:]:
-      if '-' not in ticket:
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print({ True: "Ticket {ticket} assigned to {assignee}",
         }.get(self.jira().assign_issue(ticket, assignee),
               "Could not assign ticket {ticket} to {assignee}") \
         .format(ticket=ticket, assignee=assignee))
 
+  def do_unassign(self, words):
+    """Remove assigned user from ticket(s)"""
+    for ticket in words:
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
+      print({ True: "Ticket {ticket} unassigned",
+        }.get(self.jira().assign_issue(ticket, '-1'),
+              "Could not unassign ticket {ticket}") \
+        .format(ticket=ticket))
+
   def do_block(self, words):
     """Mark a ticket as blocked/stuck"""
     for ticket in words:
-      if '-' not in ticket:
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print("marking %s as blocked" % ticket)
       self.jira().issue(ticket).update(fields={'customfield_10010': [ { 'id': '10000' } ] })
 
   def do_unblock(self, words):
     """Mark a ticket as no longer blocked/stuck"""
     for ticket in words:
-      if '-' not in ticket:
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print("marking %s as unblocked" % ticket)
       self.jira().issue(ticket).update(fields={'customfield_10010': None})
 
@@ -276,8 +273,8 @@ class iJIRA(object):
       return 
     target_priority = priorities.get(max(possible_priorities, key=len))
     for ticket in words[1:]:
-      if '-' not in ticket:
-        ticket = 'SCI-' + ticket
+      ticket = jiradls.diamond.issue_number(ticket)
+      if not ticket: continue
       print("Changing priority of %s to %s" % (ticket, target_priority))
       self.jira().issue(ticket).update(fields={'priority': { 'name': target_priority }})
 
