@@ -24,6 +24,7 @@ class iJIRA(object):
       'todo': 'open',
       'reassign': 'assign',
       'stuck': 'block',
+      'sub': 'subtask',
       'unstuck': 'unblock',
     }
 
@@ -122,6 +123,53 @@ class iJIRA(object):
 #   pprint(fields)
     issue = self.jira().create_issue(fields=fields)
     print("Ticket {} created".format(issue))
+
+  def do_subtask(self, words):
+    '''Create a subtask for an existing ticket.'''
+    ticket = jiradls.diamond.issue_number(words[0])
+    if not ticket: return
+    words = words[1:]
+
+    fields = {
+      'project': 'SCI',
+      'parent': { 'key': ticket },
+      'summary': [],
+      'description': '',
+      'issuetype': { 'name': 'Sub-task' },
+      'labels': [ 'MXSW' ],
+      'components': [],
+      'assignee': None,
+    }
+
+    priorities = { 'crit': 'Critical', 'critical': 'Critical', 'major': 'Major', 'maj': 'Major', 'minor': 'Minor' }
+
+    parsing = True
+    for n, w in enumerate(words):
+      l = w.lower()
+#     print((n, w))
+      if w.startswith('@') and fields['assignee'] is None: # Assign user
+        if l[1:] in jiradls.diamond.employee:
+          fields['assignee'] = jiradls.diamond.employee[l[1:]]
+          continue
+        if n < (len(words)-1):
+          fields['assignee'] = l[1:]
+          continue
+      if l in priorities:
+        fields['priority'] = { 'name': priorities[l] }
+        continue
+      if l == 'scratch':
+        fields['project'] = 'SCRATCH'
+        fields['components'] = [{ 'name': 'Scisoft MX' }]
+        continue
+      break
+#   print(n)
+
+    fields['summary'] = ' '.join(words[n:])
+    if fields['assignee']:
+      fields['assignee'] = { 'name': fields['assignee'] }
+
+    issue = self.jira().create_issue(fields=fields)
+    print("Ticket {} created as subtask of {}".format(issue, ticket))
 
   def transition_to(self, ticket, target, maxdepth=3):
     # Convert targets into a list of IDs
