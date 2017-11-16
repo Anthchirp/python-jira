@@ -29,7 +29,7 @@ def issue_number(candidate):
 
   is_issue = re_is_issue.match(candidate)
   if is_issue:
-    return candidate   # is already a fully qualified issue name
+    return candidate.upper()  # is already a fully qualified issue name
 
   print("{} is not a valid ticket".format(candidate))
   return False   # Do not know what this is.

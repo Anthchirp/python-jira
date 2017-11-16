@@ -246,6 +246,14 @@ class iJIRA(object):
     for ticket in words:
       ticket = jiradls.diamond.issue_number(ticket)
       if not ticket: continue
+      issue = self.jira().issue(ticket, fields='customfield_10010')
+      if issue.fields.customfield_10010:
+        # If ticket is blocked, try to unblock it before closing
+        try:
+          issue.update(fields={'customfield_10010': None})
+          print("marked %s as unblocked" % ticket)
+        except jira.exceptions.JIRAError:
+          print("could not mark %s as unblocked" % ticket)
       print({ None: "Ticket {} already closed.",
               True: "Ticket {} closed.",
       }.get(self.transition_to(ticket, ('Resolved', 'Closed')),
