@@ -131,7 +131,7 @@ class iJIRA(object):
     words = words[1:]
 
     fields = {
-      'project': 'SCI',
+      'project': ticket.split('-')[0],
       'parent': { 'key': ticket },
       'summary': [],
       'description': '',
