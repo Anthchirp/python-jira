@@ -18,7 +18,8 @@ def test_issue_number_detection():
   # Accept issue names
   assert jiradls.diamond.issue_number('SCRATCH-1234') == 'SCRATCH-1234'
   assert jiradls.diamond.issue_number('THING-1') == 'THING-1'
-  assert jiradls.diamond.issue_number('i04_1-7') == 'i04_1-7'
+  # Accept and change case
+  assert jiradls.diamond.issue_number('i04_1-7') == 'I04_1-7'
 
   # Reject invalid issue names
   assert jiradls.diamond.issue_number('SCRATCH-1234x') == False
