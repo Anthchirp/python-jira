@@ -21,7 +21,7 @@ class iJIRA(object):
       'say': 'comment',
       'do': 'work',
       'done': 'close',
-      'todo': 'open',
+      'open': 'todo',
       'reassign': 'assign',
       'stuck': 'block',
       'sub': 'subtask',
@@ -259,8 +259,8 @@ class iJIRA(object):
       }.get(self.transition_to(ticket, ('Resolved', 'Closed')),
                     "Could not close ticket {}").format(ticket))
 
-  def do_open(self, words):
-    """Reset ticket into open state"""
+  def do_todo(self, words):
+    """Reset ticket into open (to do) state"""
     for ticket in words:
       ticket = jiradls.diamond.issue_number(ticket)
       if not ticket: continue
