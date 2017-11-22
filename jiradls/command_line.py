@@ -1,7 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
+import os
 import re
+import subprocess
 import sys
+import tempfile
 
 import jiradls.diamond
 import jiradls.workflow
@@ -275,7 +278,27 @@ class iJIRA(object):
     ticket = jiradls.diamond.issue_number(words[0])
     if not ticket: return
     comment = " ".join(words[1:])
-    self.jira().add_comment(ticket, comment)
+    if not comment:
+      try:
+        fd, tmpfile = tempfile.mkstemp()
+        with open(tmpfile, 'w') as fh:
+          fh.write('\n\n### {ticket} - {summary}\n'.format(ticket=ticket, summary=self.jira().issue(ticket).fields.summary))
+          fh.write('### Text above will be added to the ticket as comment.\n')
+          fh.write('### Quit editor without saving to abort.\n')
+        os.close(fd)
+        returncode = subprocess.call(['vim', tmpfile])
+        if not returncode:
+          comment = []
+          with open(tmpfile, 'r') as fh:
+            for line in fh:
+              if not line.strip().startswith('###'):
+                comment.append(line)
+          comment = ''.join(comment).strip()
+      finally:
+        os.remove(tmpfile)
+    if comment:
+      self.jira().add_comment(ticket, comment)
+      print("Added comment to", ticket)
 
   def do_assign(self, words):
     """Assign ticket(s) to another user"""
