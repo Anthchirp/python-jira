@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import re
 import sys
 
 import jiradls.diamond
@@ -333,6 +334,27 @@ class iJIRA(object):
       if not ticket: continue
       print("Changing priority of %s to %s" % (ticket, target_priority))
       self.jira().issue(ticket).update(fields={'priority': { 'name': target_priority }})
+
+  def do_plan(self, words):
+    """Plan a ticket for an upcoming run or shutdown"""
+    runlabels, tickets = [], []
+    plan = re.compile('^([a-z]+)([0-9]?)$')
+    for word in words:
+      runlabel = plan.match(word)
+      if runlabel:
+        if runlabel.group(1) == 'run'[:len(runlabel.group(1))]:
+          runlabels.append('run' + runlabel.group(2))
+          continue
+        elif runlabel.group(1) == 'shutdown'[:len(runlabel.group(1))]:
+          runlabels.append('shutdown' + runlabel.group(2))
+          continue
+      ticket = jiradls.diamond.issue_number(word)
+      if ticket:
+        tickets.append(ticket)
+        continue
+      print("Do not understand '%s'. It does not refer to a run or a shutdown number or a ticket number." % word)
+      return
+    print("Command not yet implemented, but would set labels {} for tickets {}".format(runlabels, tickets))
 
 def main():
   iJIRA().do(sys.argv[1:])
