@@ -27,6 +27,7 @@ class iJIRA(object):
       'done': 'close',
       'open': 'todo',
       'reassign': 'assign',
+      'schedule': 'plan',
       'stuck': 'block',
       'sub': 'subtask',
       'unstuck': 'unblock',
@@ -377,7 +378,22 @@ class iJIRA(object):
         continue
       print("Do not understand '%s'. It does not refer to a run or a shutdown number or a ticket number." % word)
       return
-    print("Command not yet implemented, but would set labels {} for tickets {}".format(runlabels, tickets))
+    versions = {}
+    for ticket in tickets:
+      project = ticket.split('-')[0]
+      if project not in versions:
+        versions[project] = jiradls.diamond.filter_versions(
+                              (v.name for v in self.jira().project(project).versions),
+                              return_map = True
+                            )
+      ticketlabel = []
+      for label in runlabels:
+        if versions[project].get(label):
+          ticketlabel.append(versions[project][label])
+        else:
+          print("Warning: No appropriate label for {} found in project {} for ticket {}".format(label, project, ticket))
+      print("Setting labels {} for ticket {}".format(", ".join(sorted(ticketlabel)), ticket))
+      self.jira().issue(ticket).update(fields={'fixVersions': [{'name': l} for l in ticketlabel]})
 
 def main():
   iJIRA().do(sys.argv[1:])
