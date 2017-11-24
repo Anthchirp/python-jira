@@ -392,7 +392,10 @@ class iJIRA(object):
           ticketlabel.append(versions[project][label])
         else:
           print("Warning: No appropriate label for {} found in project {} for ticket {}".format(label, project, ticket))
-      print("Setting labels {} for ticket {}".format(", ".join(sorted(ticketlabel)), ticket))
+      if ticketlabel:
+        print("Setting label(s) {} for ticket {}".format(", ".join(sorted(ticketlabel)), ticket))
+      else:
+        print("Removing labels from ticket {}".format(ticket))
       self.jira().issue(ticket).update(fields={'fixVersions': [{'name': l} for l in ticketlabel]})
 
 def main():
