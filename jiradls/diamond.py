@@ -34,3 +34,9 @@ def issue_number(candidate):
   print("{} is not a valid ticket".format(candidate))
   return False   # Do not know what this is.
 
+def run_number():
+  try:
+    with open('/home/ops/scripts/python/displayScreens/stats/statsConfig.txt', 'r') as fh:
+      return int(re.match("^S'([0-9]+)'", fh.readline()).group(1))
+  except Exception:
+    return 0
