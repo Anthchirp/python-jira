@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import datetime
 import re
 
 employee = {
@@ -40,3 +41,35 @@ def run_number():
       return int(re.match("^S'([0-9]+)'", fh.readline()).group(1))
   except Exception:
     return 0
+
+def filter_versions(versions, run=None, year=None, return_map=False):
+  if not run:
+    run = 0
+  if not year:
+    year = datetime.datetime.today().year
+  rf = re.compile('^(Run|Shutdown) ([0-9]+) \(([0-9]{4})\)$')
+
+  def filter_version(version):
+    m = rf.match(version)
+    if not m:
+      return False
+    if int(m.group(3)) < year:
+      return False # run/shutdowns from previous years
+    if int(m.group(3)) > year:
+      return True  # run/shutdowns for future years
+    if int(m.group(2)) < run:
+      return False # run/shutdowns earlier this year
+    return True    # run/shutdowns currently and later this year
+  versions = filter(filter_version, versions)
+  if not return_map:
+    return list(versions)
+
+  version_map = {}
+  for version in versions:
+    m = rf.match(version)
+    key = m.group(1).lower() + m.group(2)
+    if key in version_map:
+      version_map[key] = min(version_map[key], version) # any given number identifies the earlier run/shutdown
+    else:
+      version_map[key] = version
+  return version_map
