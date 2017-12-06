@@ -398,5 +398,15 @@ class iJIRA(object):
         print("Removing labels from ticket {}".format(ticket))
       self.jira().issue(ticket).update(fields={'fixVersions': [{'name': l} for l in ticketlabel]})
 
+  def do_cleanup(self, _):
+    '''Close old tickets that did not have their resolution accepted.'''
+    done = False
+    while not done:
+      forgotten_issues = self.jira().search_issues('assignee = currentUser() AND resolution is not EMPTY AND status in (Resolved) and resolutiondate < -28d')
+      done = not forgotten_issues or forgotten_issues.total == len(forgotten_issues)
+      for i in forgotten_issues:
+        print("{}: {}".format(i, i.fields.summary))
+        self.transition_to(i, ('Closed'))
+
 def main():
   iJIRA().do(sys.argv[1:])
