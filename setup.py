@@ -37,6 +37,7 @@ setup(
     'colorama',
     'cryptography',
     'jira',
+    'prompt_toolkit',
     'pyjwt',
   ],
   entry_points = {

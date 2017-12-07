@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 
+import prompt_toolkit
 import jiradls.diamond
 import jiradls.workflow
 import six
@@ -48,6 +49,17 @@ class iJIRA(object):
     except AttributeError:
       return print("Unknown command '{}'. Run with\n   $ jira\nto see what is possible.".format(command))
     return func(words[1:])
+
+  def prompt(self):
+    from prompt_toolkit.history import InMemoryHistory
+    history = InMemoryHistory()
+    while True:
+      try:
+        inp = prompt_toolkit.prompt(u'jira> ',
+                  history=history)
+      except EOFError:
+        break
+      self.do(inp.split())
 
   def do_help(self, *args):
     '''Shows command line help.'''
@@ -409,4 +421,7 @@ class iJIRA(object):
         self.transition_to(i, ('Closed'))
 
 def main():
-  iJIRA().do(sys.argv[1:])
+  if sys.argv[1:]:
+    iJIRA().do(sys.argv[1:])
+  else:
+    iJIRA().prompt()

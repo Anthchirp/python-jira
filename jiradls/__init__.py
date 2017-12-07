@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-__version__ = "0.14"
+__version__ = "0.15"
 
 def jiradls():
   # Shortcut to create a Diamond JIRA object.
