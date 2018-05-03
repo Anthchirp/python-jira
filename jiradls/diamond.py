@@ -9,6 +9,8 @@ employee = {
  'mg': 'wra62962',
  'rjg': 'hko55533',
  'rg': 'hko55533',
+ 'bw': 'ekm22040',
+ 'bhw': 'ekm22040',
 }
 
 re_is_number = re.compile('^\d+$')
