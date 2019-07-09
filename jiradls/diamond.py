@@ -13,8 +13,8 @@ employee = {
  'bhw': 'ekm22040',
 }
 
-re_is_number = re.compile('^\d+$')
-re_is_issue = re.compile('^([a-zA-Z][a-zA-Z0-9_]*)-(\d+)$')
+re_is_number = re.compile(r'^\d+$')
+re_is_issue = re.compile(r'^([a-zA-Z][a-zA-Z0-9_]*)-(\d+)$')
 
 def issue_number(candidate):
   '''Take a string and see if it represents a issue or can be interpreted as
@@ -49,7 +49,7 @@ def filter_versions(versions, run=None, year=None, return_map=False):
     run = 0
   if not year:
     year = datetime.datetime.today().year
-  rf = re.compile('^(Run|Shutdown) ([0-9]+) \(([0-9]{4})\)$')
+  rf = re.compile(r'^(Run|Shutdown) ([0-9]+) \(([0-9]{4})\)$')
 
   def filter_version(version):
     m = rf.match(version)
