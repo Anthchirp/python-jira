@@ -298,6 +298,10 @@ class iJIRA(object):
           fh.write('\n\n### {ticket} - {summary}\n'.format(ticket=ticket, summary=self.jira().issue(ticket).fields.summary))
           fh.write('### Text above will be added to the ticket as comment.\n')
           fh.write('### Quit editor without saving to abort.\n')
+          fh.write('### Formatting hints: {{preformat-word}}\n')
+          fh.write('###                   {noformat}\n')
+          fh.write('###                   preformatted-block\n')
+          fh.write('###                   {noformat}\n')
         os.close(fd)
         returncode = subprocess.call(['vim', tmpfile])
         if not returncode:
