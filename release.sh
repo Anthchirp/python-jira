@@ -11,7 +11,7 @@ python setup.py sdist bdist_wheel
 
 python -m twine upload dist/*
 
-export NUMBER=$(python -c "import jiradls; print jiradls.__version__")
+export NUMBER=$(python -c "import jiradls; print(jiradls.__version__)")
 git tag -a v${NUMBER} -m v${NUMBER}
 git push origin v${NUMBER}
 python setup.py clean --all
