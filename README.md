@@ -1,2 +1,2 @@
 # python-jira
-a less bad frontend to DLS JIRA
+a command line interface to DLS JIRA
