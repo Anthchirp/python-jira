@@ -26,12 +26,12 @@ def find_version(*file_paths):
 
 setup(
   name='jiradls',
-  description='JIRA without a GUI is less bad than JIRA with a GUI, but still JIRA',
+  description='A JIRA command line interface for the DLS instance',
   license='BSD',
-  url='https://github.com/Anthchirp/python-jira',
+  url='https://github.com/DiamondLightSource/python-jira',
   author='Markus Gerstel',
-  author_email='markus.gerstel@diamond.ac.uk',
-  download_url="https://github.com/Anthchirp/python-jira/releases",
+  author_email='scientificsoftware@diamond.ac.uk',
+  download_url="https://github.com/DiamondLightSource/python-jira/releases",
   version=find_version("jiradls", "__init__.py"),
   install_requires=[
     'colorama',
@@ -44,9 +44,6 @@ setup(
     'console_scripts': ['jira=jiradls.command_line:main'],
   },
   packages=find_packages(),
-  setup_requires=[
-    'pytest-runner',
-  ],
   tests_require=[
     'mock',
     'pytest'
@@ -57,9 +54,10 @@ setup(
     'Programming Language :: Python :: 2',
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
     'Operating System :: OS Independent',
     'Topic :: Software Development :: Bug Tracking',
   ]
