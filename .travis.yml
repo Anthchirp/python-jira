@@ -7,8 +7,8 @@ python:
   - "3.8"
 install:
   - pip install .
-  - pip install coveralls
+  - pip install coveralls pytest pytest-cov
 script:
-  - coverage run --source=jiradls setup.py test
+  - pytest --cov
 after_success: coveralls
 
