@@ -18,7 +18,7 @@ with open(_DLSCONFIG_PATH) as fh:
 
 def _oauth_authenticate():
     import requests
-    from six.moves.urllib.parse import parse_qsl
+    from urllib.parse import parse_qsl
     from oauthlib.oauth1 import SIGNATURE_RSA
     from requests_oauthlib import OAuth1
     import time
