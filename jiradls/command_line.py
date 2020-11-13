@@ -46,7 +46,7 @@ class iJIRA:
             func = getattr(self, "do_" + command)
         except AttributeError:
             return print(
-                "Unknown command '{}'. Run with\n   $ jira\nto see what is possible.".format(
+                "Unknown command '{}'. Run\n   $ jira help\nto see what is possible.".format(
                     command
                 )
             )
@@ -559,6 +559,9 @@ class iJIRA:
 
 def main():
     if sys.argv[1:]:
-        iJIRA().do(sys.argv[1:])
+        if sys.argv[1:] in (["--help"], ["-h"], ["-?"]):
+            iJIRA().do(["help"])
+        else:
+            iJIRA().do(sys.argv[1:])
     else:
         iJIRA().prompt()
