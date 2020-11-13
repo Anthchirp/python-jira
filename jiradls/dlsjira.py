@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import json
 import os
 import sys
@@ -10,11 +8,11 @@ if not os.path.exists(_CONFIG_DIR):
 _CONFIG_PATH = os.path.join(_CONFIG_DIR, "config.json")
 _DLSCONFIG_PATH = os.getenv("JIRA_DLSCONFIG", "dls-configuration.json")
 try:
-    with open(_CONFIG_PATH, "r") as fh:
+    with open(_CONFIG_PATH) as fh:
         _configuration = json.load(fh)
-except IOError:
+except OSError:
     _configuration = {}
-with open(_DLSCONFIG_PATH, "r") as fh:
+with open(_DLSCONFIG_PATH) as fh:
     _dlsconfig = json.load(fh)
 
 
@@ -75,7 +73,6 @@ def _oauth_authenticate():
         resource_owner_secret=request_token_secret,
     )
 
-    timeout = time.time() + 300  # do not wait longer than 5 minutes
     in_limbo = lambda x: x.get("oauth_problem") == "permission_unknown"
     access = {"oauth_problem": "permission_unknown"}
     while in_limbo(access):

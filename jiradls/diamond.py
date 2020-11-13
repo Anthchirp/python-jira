@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import datetime
 import re
 
@@ -19,7 +17,7 @@ re_is_issue = re.compile(r"^([a-zA-Z][a-zA-Z0-9_]*)-(\d+)$")
 
 def issue_number(candidate):
     """Take a string and see if it represents a issue or can be interpreted as
-     such. If so, return fully qualified issue name."""
+    such. If so, return fully qualified issue name."""
 
     if not candidate:
         return False
@@ -40,14 +38,14 @@ def issue_number(candidate):
     if is_issue:
         return candidate.upper()  # is already a fully qualified issue name
 
-    print("{} is not a valid ticket".format(candidate))
+    print(f"{candidate} is not a valid ticket")
     return False  # Do not know what this is.
 
 
 def run_number():
     try:
         with open(
-            "/home/ops/scripts/python/displayScreens/stats/statsConfig.txt", "r"
+            "/home/ops/scripts/python/displayScreens/stats/statsConfig.txt"
         ) as fh:
             return int(re.match("^S'([0-9]+)'", fh.readline()).group(1))
     except Exception:

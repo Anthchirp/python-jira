@@ -1,20 +1,18 @@
-from __future__ import absolute_import, division, print_function
-
 import jiradls.diamond
 
 
 def test_issue_number_detection():
     # Numbers below 1000 are rejected
-    assert jiradls.diamond.issue_number("1") == False
-    assert jiradls.diamond.issue_number("12") == False
-    assert jiradls.diamond.issue_number("123") == False
+    assert jiradls.diamond.issue_number("1") is False
+    assert jiradls.diamond.issue_number("12") is False
+    assert jiradls.diamond.issue_number("123") is False
 
     # Numbers above 1000 are interpreted as SCI project
     assert jiradls.diamond.issue_number("1234") == "SCI-1234"
 
     # Non-numerical strings are rejected
-    assert jiradls.diamond.issue_number("1234s") == False
-    assert jiradls.diamond.issue_number("1s") == False
+    assert jiradls.diamond.issue_number("1234s") is False
+    assert jiradls.diamond.issue_number("1s") is False
 
     # Accept issue names
     assert jiradls.diamond.issue_number("SCRATCH-1234") == "SCRATCH-1234"
@@ -23,13 +21,13 @@ def test_issue_number_detection():
     assert jiradls.diamond.issue_number("i04_1-7") == "I04_1-7"
 
     # Reject invalid issue names
-    assert jiradls.diamond.issue_number("SCRATCH-1234x") == False
-    assert jiradls.diamond.issue_number("abc-def-1234") == False
-    assert jiradls.diamond.issue_number("banana") == False
+    assert jiradls.diamond.issue_number("SCRATCH-1234x") is False
+    assert jiradls.diamond.issue_number("abc-def-1234") is False
+    assert jiradls.diamond.issue_number("banana") is False
 
     # Other things
-    assert jiradls.diamond.issue_number("") == False
-    assert jiradls.diamond.issue_number(None) == False
+    assert jiradls.diamond.issue_number("") is False
+    assert jiradls.diamond.issue_number(None) is False
 
 
 def test_fixversion_filtering():

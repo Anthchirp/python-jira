@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import os
 import re
 import subprocess
@@ -9,7 +7,6 @@ import tempfile
 import prompt_toolkit
 import jiradls.diamond
 import jiradls.workflow
-import six
 from colorama import Fore, Style
 
 colors = {
@@ -20,7 +17,7 @@ colors = {
 }
 
 
-class iJIRA(object):
+class iJIRA:
     def __init__(self):
         self._jira = None
         self._aliases = {
@@ -61,14 +58,14 @@ class iJIRA(object):
         history = InMemoryHistory()
         while True:
             try:
-                inp = prompt_toolkit.prompt(u"jira> ", history=history)
+                inp = prompt_toolkit.prompt("jira> ", history=history)
             except EOFError:
                 break
             self.do(inp.split())
 
     def do_help(self, *args):
         """Shows command line help."""
-        print("JIRA command line interface v{}\n".format(jiradls.__version__))
+        print(f"JIRA command line interface v{jiradls.__version__}\n")
         for f in sorted(dir(self)):
             if f.startswith("do_"):
                 command = f.replace("do_", "jira ")
@@ -91,7 +88,7 @@ class iJIRA(object):
                                 indent=indent,
                                 plural=plural,
                                 list="{reset}, {green}".join(aliases),
-                                **colors
+                                **colors,
                             )
                         )
                     if len(text) > 1:
@@ -107,8 +104,8 @@ class iJIRA(object):
     def do_list(self, words=None):
         """Shows a list of all your issues
 
-       This is currently unsorted and limited to 50 issues.
-    """
+        This is currently unsorted and limited to 50 issues.
+        """
         all_my_issues = self.jira().search_issues(
             "assignee = currentUser() AND resolution = unresolved ORDER BY RANK ASC"
         )
@@ -122,7 +119,7 @@ class iJIRA(object):
             )
         print()
         for i in all_my_issues:
-            print("{}: {}".format(i, i.fields.summary))
+            print(f"{i}: {i.fields.summary}")
 
     def do_add(self, words=None):
         """Create a new ticket"""
@@ -144,7 +141,6 @@ class iJIRA(object):
             "minor": "Minor",
         }
 
-        parsing = True
         for n, w in enumerate(words):
             l = w.lower()
             #     print((n, w))
@@ -172,7 +168,7 @@ class iJIRA(object):
         #   from pprint import pprint
         #   pprint(fields)
         issue = self.jira().create_issue(fields=fields)
-        print("Ticket {} created".format(issue))
+        print(f"Ticket {issue} created")
 
     def do_subtask(self, words):
         """Create a subtask for an existing ticket."""
@@ -200,7 +196,6 @@ class iJIRA(object):
             "minor": "Minor",
         }
 
-        parsing = True
         for n, w in enumerate(words):
             l = w.lower()
             #     print((n, w))
@@ -226,11 +221,11 @@ class iJIRA(object):
             fields["assignee"] = {"name": fields["assignee"]}
 
         issue = self.jira().create_issue(fields=fields)
-        print("Ticket {} created as subtask of {}".format(issue, ticket))
+        print(f"Ticket {issue} created as subtask of {ticket}")
 
     def transition_to(self, ticket, target, maxdepth=3):
         # Convert targets into a list of IDs
-        if isinstance(target, (int, six.string_types)):
+        if isinstance(target, (int, (str,))):
             target = [target]
         target = [
             t if isinstance(t, int) else jiradls.workflow.status_id[t.lower()]
@@ -341,8 +336,8 @@ class iJIRA(object):
                 try:
                     issue.update(fields={"customfield_10010": None})
                     print("marked %s as unblocked" % ticket)
-                except jira.exceptions.JIRAError:
-                    print("could not mark %s as unblocked" % ticket)
+                except Exception as e:
+                    print("could not mark %s as unblocked (%s)" % (ticket, e))
             print(
                 {None: "Ticket {} already closed.", True: "Ticket {} closed."}
                 .get(
@@ -393,7 +388,7 @@ class iJIRA(object):
                 returncode = subprocess.call(["vim", tmpfile])
                 if not returncode:
                     comment = []
-                    with open(tmpfile, "r") as fh:
+                    with open(tmpfile) as fh:
                         for line in fh:
                             if not line.strip().startswith("###"):
                                 comment.append(line)
@@ -463,7 +458,7 @@ class iJIRA(object):
 
     def do_priority(self, words):
         """Change ticket priority
-       (trivial = lowest, minor = low, normal, major = high, critical = highest)"""
+        (trivial = lowest, minor = low, normal, major = high, critical = highest)"""
         priorities = {
             "t": "Trivial",
             "mi": "Minor",
@@ -490,7 +485,7 @@ class iJIRA(object):
             ticket = jiradls.diamond.issue_number(ticket)
             if not ticket:
                 continue
-            print("Changing priority of %s to %s" % (ticket, target_priority))
+            print(f"Changing priority of {ticket} to {target_priority}")
             self.jira().issue(ticket).update(
                 fields={"priority": {"name": target_priority}}
             )
@@ -542,7 +537,7 @@ class iJIRA(object):
                     )
                 )
             else:
-                print("Removing labels from ticket {}".format(ticket))
+                print(f"Removing labels from ticket {ticket}")
             self.jira().issue(ticket).update(
                 fields={"fixVersions": [{"name": l} for l in ticketlabel]}
             )
@@ -558,7 +553,7 @@ class iJIRA(object):
                 forgotten_issues
             )
             for i in forgotten_issues:
-                print("{}: {}".format(i, i.fields.summary))
+                print(f"{i}: {i.fields.summary}")
                 self.transition_to(i, ("Closed"))
 
 

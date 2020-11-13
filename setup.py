@@ -1,6 +1,3 @@
-from __future__ import absolute_import, division
-
-import io
 import os
 import re
 
@@ -9,7 +6,7 @@ from setuptools import find_packages, setup
 # cf.
 # https://packaging.python.org/guides/single-sourcing-package-version/#single-sourcing-the-version
 def read(*names, **kwargs):
-    with io.open(
+    with open(
         os.path.join(os.path.dirname(__file__), *names),
         encoding=kwargs.get("encoding", "utf8"),
     ) as fp:
