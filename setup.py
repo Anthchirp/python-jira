@@ -3,7 +3,6 @@ from __future__ import absolute_import, division
 import io
 import os
 import re
-import sys
 
 from setuptools import find_packages, setup
 
@@ -34,20 +33,27 @@ setup(
     author_email="scientificsoftware@diamond.ac.uk",
     download_url="https://github.com/DiamondLightSource/python-jira/releases",
     version=find_version("jiradls", "__init__.py"),
-    install_requires=["colorama", "cryptography", "jira", "prompt_toolkit", "pyjwt",],
-    entry_points={"console_scripts": ["jira=jiradls.command_line:main"],},
+    install_requires=[
+        "colorama",
+        "cryptography",
+        "jira",
+        "prompt_toolkit",
+        "pyjwt",
+    ],
+    entry_points={
+        "console_scripts": ["jira=jiradls.command_line:main"],
+    },
     packages=find_packages(),
-    tests_require=["mock", "pytest"],
+    python_requires=">=3.6",
+    tests_require=["pytest"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Bug Tracking",
     ],
